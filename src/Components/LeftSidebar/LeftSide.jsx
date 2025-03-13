@@ -44,7 +44,7 @@ const LeftSide = () => {
       <div className="text-center mt-8">
         <p className="text-gray-700 font-medium">{user?.email || userData?.email}</p>
         <p className="text-gray-600 text-sm mt-1">Access premium insights</p>
-        <button className="text-blue-600 font-semibold mt-2">Try Premium</button>
+        <button className="text-blue-600 font-semibold mt-2">Try App</button>
       </div>
 
       <div className="mt-6 pl-4">
