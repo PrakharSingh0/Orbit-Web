@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../AppContext/AppContext';
-import { doc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { Avatar } from '@material-tailwind/react';
 import avatar from '../../assets/images/avatar.jpg';
@@ -59,31 +59,86 @@ const UserProfile = () => {
         setSuccess('');
     };
 
+    const createUserDocument = async () => {
+        try {
+            if (!user || !user.uid) {
+                return false;
+            }
+            
+            console.log('Creating new user document for UID:', user.uid);
+            const collectionUsersRef = collection(db, 'users');
+            
+            await addDoc(collectionUsersRef, {
+                uid: user.uid,
+                name: formData.name || user.displayName || '',
+                email: user.email || '',
+                phone: formData.phone || '',
+                location: formData.location || '',
+                bio: formData.bio || '',
+                providerId: user.providerData[0]?.providerId || 'unknown',
+                image: user.photoURL || ''
+            });
+            
+            console.log('User document created successfully');
+            return true;
+        } catch (err) {
+            console.error('Error creating user document:', err);
+            return false;
+        }
+    };
+    
     const handleSave = async () => {
         try {
             setLoading(true);
             setError('');
             setSuccess('');
             
+            // Check if user is available
+            if (!user || !user.uid) {
+                setError('User authentication data is not available. Please try logging in again.');
+                return;
+            }
+            
+            console.log('Searching for user document with UID:', user.uid);
             const q = query(collection(db, 'users'), where('uid', '==', user.uid));
             const querySnapshot = await getDocs(q);
             
+            console.log('Query result:', querySnapshot.empty ? 'No documents found' : `Found ${querySnapshot.docs.length} documents`);
+            
             if (!querySnapshot.empty) {
                 const userDoc = querySnapshot.docs[0];
-                await updateDoc(doc(db, 'users', userDoc.id), {
+                console.log('User document found with ID:', userDoc.id);
+                
+                const updatedData = {
                     name: formData.name,
                     phone: formData.phone,
                     location: formData.location,
                     bio: formData.bio,
-                });
+                };
+                
+                await updateDoc(doc(db, 'users', userDoc.id), updatedData);
                 setSuccess('Profile updated successfully!');
                 setEditMode(false);
+                
+              
             } else {
-                setError('User document not found');
+                console.error('User document not found for UID:', user.uid);
+                
+                // Attempt to create a new user document
+                const created = await createUserDocument();
+                
+                if (created) {
+                    setSuccess('Your profile has been created and updated successfully!');
+                    setEditMode(false);
+                    
+                  
+                } else {
+                    setError('Unable to create or update your profile. Please try logging out and back in.');
+                }
             }
         } catch (err) {
+            console.error('Error in handleSave:', err);
             setError('Error updating profile: ' + err.message);
-            console.error(err);
         } finally {
             setLoading(false);
         }
