@@ -5,6 +5,7 @@ import Login from "./Login";
 import Register from "./Register";
 import Reset from "./Reset";
 import FriendProfile from "./FriendProfile";
+import UserProfile from "./Userprofile";
 
 const Pages = () => {
   return (
@@ -17,6 +18,10 @@ const Pages = () => {
         <Route
           path="/profile/:id"
           element={<FriendProfile></FriendProfile>}
+        ></Route>
+        <Route
+          path="/userprofile"
+          element={<UserProfile></UserProfile>}
         ></Route>
       </Routes>
     </div>

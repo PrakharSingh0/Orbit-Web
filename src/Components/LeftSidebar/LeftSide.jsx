@@ -1,6 +1,7 @@
-import React, { useRef, useState, useEffect, useContext } from "react";
+import React, { useRef, useState, useEffect, useContext,  } from "react";
 import { Avatar, Tooltip } from "@material-tailwind/react";
 import { AuthContext } from "../AppContext/AppContext";
+import { Link } from "react-router-dom";
 import nature from "../../assets/images/nature.jpg";
 import avatar from "../../assets/images/avatar.jpg";
 import location from "../../assets/images/location.png";
@@ -29,14 +30,19 @@ const LeftSide = () => {
 
     return () => clearInterval(adInterval);
   }, []);
-
+ 
   return (
     <div className="flex flex-col h-screen bg-white border-2 rounded-r-xl shadow-lg pb-4">
       <div className="relative">
         <img src={nature} alt="nature" className="h-28 w-full rounded-r-xl" />
-        <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2">
+        <div 
+          className="absolute -bottom-4 left-1/2 transform -translate-x-1/2" 
+       
+        >
           <Tooltip content="Profile" placement="top">
-            <Avatar size="md" src={user?.photoURL || avatar} alt="avatar" />
+            <Link to="/userprofile">
+              <Avatar size="md" src={user?.photoURL || avatar} alt="avatar" className="cursor-pointer"/>
+            </Link>
           </Tooltip>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { Tooltip } from "@material-tailwind/react";
 import { Avatar } from "@material-tailwind/react";
 import avatar from "../../assets/images/avatar.jpg";
 import { AuthContext } from "../AppContext/AppContext";
+import { Link } from "react-router-dom";
 
 const UserLinks = () => {
   const { signOutUser, user, userData } = useContext(AuthContext);
@@ -10,6 +11,7 @@ const UserLinks = () => {
   return (
     <div className="flex justify-center items-center cursor-pointer">
       <div className="hover:translate-y-1 duration-500 ease-in-out hover:text-blue-500">
+      <Link to="/userprofile" className="hover:translate-y-1 duration-500 ease-in-out hover:text-blue-500">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -24,6 +26,8 @@ const UserLinks = () => {
             d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
           />
         </svg>
+      
+        </Link>
       </div>
       <div className="hover:translate-y-1 duration-500 ease-in-out hover:text-blue-500">
         <svg
@@ -57,20 +61,25 @@ const UserLinks = () => {
           />
         </svg>
       </div>
-      <div className="mx-4 flex items-center" onClick={signOutUser}>
-        <Tooltip content="Sign Out" placement="bottom">
-          <Avatar
-            src={user?.photoURL || avatar}
-            size="sm"
-            alt="avatar"
-          ></Avatar>
+      <div className="mx-4 flex items-center">
+        <Tooltip content="Profile" placement="bottom">
+          <Link to="/userprofile">
+            <Avatar
+              src={user?.photoURL || avatar}
+              size="sm"
+              alt="avatar"
+              className="cursor-pointer"
+            ></Avatar>
+          </Link>
         </Tooltip>
-        <p className="ml-4 font-roboto text-sm text-black font-medium no-underline">
-          {user?.displayName === null && userData?.name !== undefined
-            ? userData?.name?.charAt(0)?.toUpperCase() +
-              userData?.name?.slice(1)
-            : user?.displayName?.split(" ")[0]}
-        </p>
+        <div className="flex items-center" onClick={signOutUser}>
+          <p className="ml-4 font-roboto text-sm text-black font-medium no-underline cursor-pointer">
+            {user?.displayName === null && userData?.name !== undefined
+              ? userData?.name?.charAt(0)?.toUpperCase() +
+                userData?.name?.slice(1)
+              : user?.displayName?.split(" ")[0]}
+          </p>
+        </div>
       </div>
     </div>
   );
