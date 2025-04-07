@@ -1,116 +1,121 @@
-import React, { useState, useEffect } from "react";
-import LeftSide from "../LeftSidebar/LeftSide";
+import React, { useState, useEffect, useContext } from "react";
+import { useParams } from "react-router-dom";
+import { collection, query, where, onSnapshot, setDoc, deleteDoc, doc, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebase";
+import { AuthContext } from "../AppContext/AppContext";
 import Navbar from "../Navbar/Navbar";
+import LeftSide from "../LeftSidebar/LeftSide";
 import RightSide from "../RightSidebar/RightSide";
 import Main from "../Main/Main";
-import profilePic from "../../assets/images/profilePic.jpg";
 import { Avatar } from "@material-tailwind/react";
+import profilePic from "../../assets/images/profilePic.jpg";
 import avatar from "../../assets/images/avatar.jpg";
-import { collection, where, query, onSnapshot } from "firebase/firestore";
-import { db } from "../firebase/firebase";
-import { useParams } from "react-router-dom";
 
 const FriendProfile = () => {
   const { id } = useParams();
+  const { user: currentUser } = useContext(AuthContext);
+
   const [profile, setProfile] = useState(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
 
   useEffect(() => {
     const getUserProfile = async () => {
       const q = query(collection(db, "users"), where("uid", "==", id));
-      await onSnapshot(q, (doc) => {
-        setProfile(doc.docs[0].data());
+      onSnapshot(q, (snapshot) => {
+        if (!snapshot.empty) {
+          setProfile(snapshot.docs[0].data());
+        }
       });
     };
     getUserProfile();
   }, [id]);
-  console.log(profile);
+
+  useEffect(() => {
+    const checkFollowing = async () => {
+      if (!currentUser) return;
+      const docRef = doc(db, `users/${currentUser.uid}/following`, id);
+      const snap = await getDocs(collection(db, `users/${id}/followers`));
+      setFollowerCount(snap.size);
+      snap.forEach((doc) => {
+        if (doc.id === currentUser.uid) {
+          setIsFollowing(true);
+        }
+      });
+    };
+    checkFollowing();
+  }, [id, currentUser]);
+
+  const handleFollow = async () => {
+    await setDoc(doc(db, `users/${id}/followers`, currentUser.uid), {
+      followedAt: Date.now(),
+    });
+    await setDoc(doc(db, `users/${currentUser.uid}/following`, id), {
+      followedAt: Date.now(),
+    });
+    setIsFollowing(true);
+    setFollowerCount((prev) => prev + 1);
+  };
+
+  const handleUnfollow = async () => {
+    await deleteDoc(doc(db, `users/${id}/followers`, currentUser.uid));
+    await deleteDoc(doc(db, `users/${currentUser.uid}/following`, id));
+    setIsFollowing(false);
+    setFollowerCount((prev) => prev - 1);
+  };
 
   return (
     <div className="w-full">
       <div className="fixed top-0 z-10 w-full bg-white">
-        <Navbar></Navbar>
+        <Navbar />
       </div>
       <div className="flex bg-gray-100">
         <div className="flex-auto w-[20%] fixed top-12">
-          <LeftSide></LeftSide>
+          <LeftSide />
         </div>
         <div className="flex-auto w-[60%] absolute left-[20%] top-14 bg-gray-100 rounded-xl">
           <div className="w-[80%] mx-auto">
-            <div>
-              <div className="relative py-4">
-                <img
-                  className="h-96 w-full rounded-md"
-                  src={profilePic}
-                  alt="profilePic"
-                ></img>
-                <div className="absolute bottom-10 left-6">
-                  <Avatar
-                    size="xl"
-                    variant="circular"
-                    src={profile?.image || avatar}
-                    alt="avatar"
-                  ></Avatar>
-                  <p className="py-2 font-roboto font-medium text-sm text-white no-underline tracking-normal leading-none">
-                    {profile?.email}
-                  </p>
-                  <p className="py-2 font-roboto font-medium text-sm text-white no-underline tracking-normal leading-none">
-                    {profile?.name}
-                  </p>
-                </div>
-                <div className="flex flex-col absolute right-6 bottom-10">
-                  <div className="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="#fff"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-                      />
-                    </svg>
-
-                    <span className="ml-2 py-2 font-roboto font-medium text-sm text-white no-underline tracking-normal leading-none">
-                      From Tokyo, Japan
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="#fff"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m1.5.5l-1.5-.5M6.75 7.364V3h-3v18m3-13.636l10.5-3.819"
-                      />
-                    </svg>
-
-                    <span className="ml-2 py-2 font-roboto font-medium text-sm text-white no-underline tracking-normal leading-none">
-                      Lives in New York
-                    </span>
-                  </div>
-                </div>
+            <div className="relative py-4">
+              <img
+                className="h-96 w-full rounded-md"
+                src={profilePic}
+                alt="profilePic"
+              />
+              <div className="absolute bottom-10 left-6">
+                <Avatar
+                  size="xl"
+                  variant="circular"
+                  src={profile?.image || avatar}
+                  alt="avatar"
+                />
+                <p className="py-2 text-white font-semibold text-lg">
+                  {profile?.name}
+                </p>
+                <p className="text-white text-sm">{profile?.email}</p>
+              </div>
+              <div className="absolute bottom-10 right-6 flex flex-col items-end">
+                <p className="text-white font-semibold text-lg">
+                  Followers: {followerCount}
+                </p>
+                {currentUser?.uid !== id && (
+                  <button
+                    className={`mt-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      isFollowing
+                        ? "bg-red-500 text-white hover:bg-red-600"
+                        : "bg-blue-500 text-white hover:bg-blue-600"
+                    }`}
+                    onClick={isFollowing ? handleUnfollow : handleFollow}
+                  >
+                    {isFollowing ? "Unfollow" : "Follow"}
+                  </button>
+                )}
               </div>
             </div>
-            <Main></Main>
+            <Main />
           </div>
         </div>
         <div className="flex-auto w-[20%] fixed right-0 top-12">
-          <RightSide></RightSide>
+          <RightSide />
         </div>
       </div>
     </div>
