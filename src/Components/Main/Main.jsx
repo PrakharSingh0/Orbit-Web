@@ -1,49 +1,28 @@
-import React, {
-  useState,
-  useRef,
-  useContext,
-  useReducer,
-  useEffect,
-} from "react";
-import { Avatar } from "@material-tailwind/react";
+import React, { useState, useRef, useContext, useReducer, useEffect } from "react";
+import { Avatar, Button, Alert } from "@material-tailwind/react";
 import avatar from "../../assets/images/avatar.jpg";
-import { Button } from "@material-tailwind/react";
 import live from "../../assets/images/live.png";
 import smile from "../../assets/images/smile.png";
 import addImage from "../../assets/images/add-image.png";
 import { AuthContext } from "../AppContext/AppContext";
 import {
-  doc,
-  setDoc,
-  collection,
-  serverTimestamp,
-  query,
-  orderBy,
-  onSnapshot,
+  doc, setDoc, collection, serverTimestamp, query, orderBy, onSnapshot
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import {
-  PostsReducer,
-  postActions,
-  postsStates,
+  PostsReducer, postActions, postsStates
 } from "../AppContext/PostReducer";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
-import { Alert } from "@material-tailwind/react";
 import PostCard from "./PostCard";
+import axios from "axios";
 
 const Main = () => {
-  const { user, userData } = useContext(AuthContext);
+  const { currentUser, userData } = useContext(AuthContext);
   const text = useRef("");
   const scrollRef = useRef("");
   const [image, setImage] = useState(null);
   const [file, setFile] = useState(null);
   const collectionRef = collection(db, "posts");
-  const postRef = doc(collection(db, "posts"));
+  const postRef = doc(collectionRef);
   const document = postRef.id;
   const [state, dispatch] = useReducer(PostsReducer, postsStates);
   const { SUBMIT_POST, HANDLE_ERROR } = postActions;
@@ -53,78 +32,52 @@ const Main = () => {
     setFile(e.target.files[0]);
   };
 
+  const uploadToCloudinary = async () => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      const res = await axios.post(import.meta.env.VITE_CLOUDINARY_URL, formData, {
+        onUploadProgress: (e) => {
+          const progress = Math.round((e.loaded * 100) / e.total);
+          setProgressBar(progress);
+        },
+      });
+      setImage(res.data.secure_url);
+    } catch (err) {
+      alert("Upload failed");
+      dispatch({ type: HANDLE_ERROR });
+      console.error(err.message);
+    }
+  };
+
   const handleSubmitPost = async (e) => {
     e.preventDefault();
     if (text.current.value !== "") {
       try {
         await setDoc(postRef, {
           documentId: document,
-          uid: user?.uid || userData?.uid,
-          logo: user?.photoURL,
-          name: user?.displayName || userData?.name,
-          email: user?.email || userData?.email,
+          uid: currentUser?.uid || userData?.uid,
+          logo: currentUser?.photoURL,
+          name: currentUser?.displayName || userData?.name,
+          email: currentUser?.email || userData?.email,
           text: text.current.value,
           image: image,
           timestamp: serverTimestamp(),
         });
         text.current.value = "";
+        setImage(null);
+        setFile(null);
+        setProgressBar(0);
       } catch (err) {
         dispatch({ type: HANDLE_ERROR });
         alert(err.message);
-        console.log(err.message);
       }
     } else {
       dispatch({ type: HANDLE_ERROR });
-    }
-  };
-
-  const storage = getStorage();
-
-  const metadata = {
-    contentType: [
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/gif",
-      "image/svg+xml",
-    ],
-  };
-
-  const submitImage = async () => {
-    const fileType = metadata.contentType.includes(file["type"]);
-    if (!file) return;
-    if (fileType) {
-      try {
-        const storageRef = ref(storage, `images/${file.name}`);
-        const uploadTask = uploadBytesResumable(
-          storageRef,
-          file,
-          metadata.contentType
-        );
-        await uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            const progress = Math.round(
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-            );
-            setProgressBar(progress);
-          },
-          (error) => {
-            alert(error);
-          },
-          async () => {
-            await getDownloadURL(uploadTask.snapshot.ref).then(
-              (downloadURL) => {
-                setImage(downloadURL);
-              }
-            );
-          }
-        );
-      } catch (err) {
-        dispatch({ type: HANDLE_ERROR });
-        alert(err.message);
-        console.log(err.message);
-      }
     }
   };
 
@@ -137,9 +90,6 @@ const Main = () => {
           posts: doc?.docs?.map((item) => item?.data()),
         });
         scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
-        setImage(null);
-        setFile(null);
-        setProgressBar(0);
       });
     };
     return () => postData();
@@ -152,110 +102,82 @@ const Main = () => {
           <Avatar
             size="sm"
             variant="circular"
-            src={user?.photoURL || avatar}
+            src={currentUser?.photoURL || avatar}
             alt="avatar"
-          ></Avatar>
+          />
           <form className="w-full" onSubmit={handleSubmitPost}>
             <div className="flex justify-between items-center">
               <div className="w-full ml-4">
                 <input
                   type="text"
-                  name="text"
-                  placeholder={`Whats on your mind ${
-                    user?.displayName?.split(" ")[0] ||
-                    userData?.name?.charAt(0).toUpperCase() +
-                      userData?.name?.slice(1)
-                  }`}
+                  placeholder={`What's on your mind ${currentUser?.displayName?.split(" ")[0] || userData?.name}`}
                   className="outline-none w-full bg-white rounded-md"
                   ref={text}
-                ></input>
+                />
               </div>
               <div className="mx-4">
-                {image && (
-                  <img
-                    className="h-24 rounded-xl"
-                    src={image}
-                    alt="previewImage"
-                  ></img>
-                )}
+                {image && <img className="h-24 rounded-xl" src={image} alt="previewImage" />}
               </div>
               <div className="mr-4">
-                <Button variant="text" type="submit">
-                  Share
-                </Button>
+                <Button variant="text" type="submit">Share</Button>
               </div>
             </div>
           </form>
         </div>
-        <span
-          style={{ width: `${progressBar}%` }}
-          className="bg-blue-700 py-1 rounded-md"
-        ></span>
+        <span style={{ width: `${progressBar}%` }} className="bg-blue-700 py-1 rounded-md"></span>
         <div className="flex justify-around items-center pt-4">
           <div className="flex items-center">
-            <label
-              htmlFor="addImage"
-              className="cursor-pointer flex items-center"
-            >
-              <img className="h-10 mr-4" src={addImage} alt="addImage"></img>
+            <label htmlFor="addImage" className="cursor-pointer flex items-center">
+              <img className="h-10 mr-4" src={addImage} alt="addImage" />
               <input
                 id="addImage"
                 type="file"
                 style={{ display: "none" }}
                 onChange={handleUpload}
-              ></input>
+              />
             </label>
             {file && (
-              <Button variant="text" onClick={submitImage}>
+              <Button variant="text" onClick={uploadToCloudinary}>
                 Upload
               </Button>
             )}
           </div>
           <div className="flex items-center">
-            <img className="h-10 mr-4" src={live} alt="live"></img>
-            <p className="font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none">
-              Live
-            </p>
+            <img className="h-10 mr-4" src={live} alt="live" />
+            <p className="text-gray-700 font-medium">Live</p>
           </div>
           <div className="flex items-center">
-            <img className="h-10 mr-4" src={smile} alt="feeling"></img>
-            <p className="font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none">
-              Feeling
-            </p>
+            <img className="h-10 mr-4" src={smile} alt="feeling" />
+            <p className="text-gray-700 font-medium">Feeling</p>
           </div>
         </div>
       </div>
+
       <div className="flex flex-col py-4 w-full">
         {state?.error ? (
           <div className="flex justify-center items-center">
-            <Alert color="red">
-              Something went wrong refresh and try again...
-            </Alert>
+            <Alert color="red">Something went wrong. Try again.</Alert>
           </div>
         ) : (
           <div>
             {state?.posts?.length > 0 &&
-              state?.posts?.map((post, index) => {
-                return (
-                  <PostCard
-                    key={index}
-                    logo={post?.logo}
-                    id={post?.documentId}
-                    uid={post?.uid}
-                    name={post?.name}
-                    email={post?.email}
-                    image={post?.image}
-                    text={post?.text}
-                    timestamp={new Date(
-                      post?.timestamp?.toDate()
-                    )?.toUTCString()}
-                  ></PostCard>
-                );
-              })}
+              state?.posts?.map((post, index) => (
+                <PostCard
+                  key={index}
+                  logo={post?.logo}
+                  id={post?.documentId}
+                  uid={post?.uid}
+                  name={post?.name}
+                  email={post?.email}
+                  image={post?.image}
+                  text={post?.text}
+                  timestamp={new Date(post?.timestamp?.toDate())?.toUTCString()}
+                />
+              ))}
           </div>
         )}
       </div>
-      <div ref={scrollRef}>{/* refference for later */}</div>
+      <div ref={scrollRef}></div>
     </div>
   );
 };
