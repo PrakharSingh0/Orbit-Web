@@ -1,93 +1,163 @@
-import React, { useRef, useState, useEffect, useContext,  } from "react";
-import { Avatar, Tooltip } from "@material-tailwind/react";
+import React, { useContext, useEffect, useState } from "react";
+import { Avatar, Tooltip, Button } from "@material-tailwind/react";
 import { AuthContext } from "../AppContext/AppContext";
 import { Link } from "react-router-dom";
-import nature from "../../assets/images/nature.jpg";
-import avatar from "../../assets/images/avatar.jpg";
-import location from "../../assets/images/location.png";
-import job from "../../assets/images/job.png";
-import facebook from "../../assets/images/facebook.png";
-import twitter from "../../assets/images/twitter.png";
-import laptop from "../../assets/images/laptop.jpg";
-import media from "../../assets/images/media.jpg";
-import apps from "../../assets/images/apps.jpg";
-import tik from "../../assets/images/tik.jpg";
+import {
+  HiOutlineLocationMarker,
+  HiOutlineBriefcase,
+} from "react-icons/hi";
+import {
+  FiUsers,
+  FiPlusCircle,
+  FiMoreHorizontal,
+  FiFacebook,
+  FiTwitter,
+} from "react-icons/fi";
+import { doc, getDoc, setDoc, deleteDoc, collection, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase/firebase";
 
 const LeftSide = () => {
-  const [currentAd, setCurrentAd] = useState({});
-  const adIndex = useRef(0);
-  const { user, userData } = useContext(AuthContext);
+  const { currentUser, userData } = useContext(AuthContext);
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+  const [isFollowing, setIsFollowing] = useState(false);
 
-  const ads = [laptop, media, apps, tik];
+  const uid = currentUser?.uid || userData?.uid;
 
   useEffect(() => {
-    setCurrentAd(ads[0]);
+    if (!uid) return;
 
-    const adInterval = setInterval(() => {
-      adIndex.current = (adIndex.current + 1) % ads.length;
-      setCurrentAd(ads[adIndex.current]);
-    }, 2000);
+    const unsubFollowers = onSnapshot(collection(db, `users/${uid}/followers`), (snap) => {
+      setFollowers(snap.docs.map(doc => doc.id));
+    });
 
-    return () => clearInterval(adInterval);
-  }, []);
- 
+    const unsubFollowing = onSnapshot(collection(db, `users/${uid}/following`), (snap) => {
+      setFollowing(snap.docs.map(doc => doc.id));
+    });
+
+    return () => {
+      unsubFollowers();
+      unsubFollowing();
+    };
+  }, [uid]);
+
+  useEffect(() => {
+    if (!uid) return;
+
+    const checkFollow = async () => {
+      const ref = doc(db, `users/${uid}/followers`, uid);
+      const snap = await getDoc(ref);
+      setIsFollowing(snap.exists());
+    };
+
+    checkFollow();
+  }, [uid]);
+
+  const handleFollowToggle = async () => {
+    const followerRef = doc(db, `users/${uid}/followers`, uid);
+    const followingRef = doc(db, `users/${uid}/following`, uid);
+
+    if (isFollowing) {
+      await deleteDoc(followerRef);
+      await deleteDoc(followingRef);
+      setIsFollowing(false);
+    } else {
+      await setDoc(followerRef, { followedAt: Date.now() });
+      await setDoc(followingRef, { followedAt: Date.now() });
+      setIsFollowing(true);
+    }
+  };
+
   return (
-    <div className="flex flex-col h-screen bg-white border-2 rounded-r-xl shadow-lg pb-4">
-      <div className="relative">
-        <img src={nature} alt="nature" className="h-28 w-full rounded-r-xl" />
-        <div 
-          className="absolute -bottom-4 left-1/2 transform -translate-x-1/2" 
-       
-        >
-          <Tooltip content="Profile" placement="top">
+    <div className="hidden lg:flex flex-col h-screen sticky top-0 bg-white border-r border-gray-100 shadow-md p-4 overflow-y-auto">
+
+      <div className="relative mb-8">
+        <div className="h-24 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-pink-500"></div>
+        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
+          <Tooltip content="Go to Profile">
             <Link to="/userprofile">
-              <Avatar size="md" src={user?.photoURL || avatar} alt="avatar" className="cursor-pointer"/>
+              <Avatar
+                size="xl"
+                src={currentUser?.photoURL || "https://source.unsplash.com/200x200?person"}
+                alt="profile"
+                className="border-4 border-white shadow-lg"
+              />
             </Link>
           </Tooltip>
         </div>
       </div>
 
-      <div className="text-center mt-8">
-        <p className="text-gray-700 font-medium">{user?.email || userData?.email}</p>
-        <p className="text-gray-600 text-sm mt-1">Access premium insights</p>
-        <button className="text-blue-600 font-semibold mt-2">Try App</button>
+
+      <div className="text-center mt-12 mb-6">
+        <h3 className="text-lg font-semibold text-gray-800">
+          {currentUser?.displayName || userData?.name || "Username"}
+        </h3>
+        <p className="text-gray-500 text-sm">
+          {currentUser?.email || userData?.email}
+        </p>
+        <Button
+          onClick={handleFollowToggle}
+          className={`mt-4 rounded-full text-xs px-4 py-1.5 ${
+            isFollowing ? "bg-red-500" : "bg-blue-500"
+          } text-white shadow-md`}
+        >
+          {isFollowing ? "Unfollow" : "Follow"}
+        </Button>
       </div>
 
-      <div className="mt-6 pl-4">
-        <div className="flex items-center mb-4">
-          <img src={location} alt="location" className="h-8 mr-3" />
-          <span className="font-semibold text-lg">California</span>
+      <div className="flex justify-between mb-6 px-4 text-center">
+        <div>
+          <p className="text-md font-bold text-gray-800">{followers.length}</p>
+          <p className="text-xs text-gray-500">Followers</p>
         </div>
-
-        <div className="flex items-center">
-          <img src={job} alt="job" className="h-8 mr-3" />
-          <span className="font-semibold text-lg">React Developer</span>
+        <div>
+          <p className="text-md font-bold text-gray-800">{following.length}</p>
+          <p className="text-xs text-gray-500">Following</p>
         </div>
-      </div>
-
-      <div className="flex justify-around mt-6 text-blue-600 font-semibold">
-        <button>Events</button>
-        <button>Groups</button>
-        <button>Follow</button>
-        <button>More</button>
-      </div>
-
-      <div className="mt-8 pl-4">
-        <p className="font-semibold text-lg">Social Profiles</p>
-        <div className="flex items-center mt-4">
-          <img src={facebook} alt="facebook" className="h-8 mr-3" />
-          <span className="text-blue-500">Facebook</span>
-        </div>
-
-        <div className="flex items-center mt-4">
-          <img src={twitter} alt="twitter" className="h-8 mr-3" />
-          <span className="text-blue-500">Twitter</span>
+        <div>
+          <p className="text-md font-bold text-gray-800">24</p>
+          <p className="text-xs text-gray-500">Posts</p>
         </div>
       </div>
 
-      <div className="mt-8 text-center">
-        <p className="font-semibold text-lg mb-4">Sponsored Ad</p>
-        <img src={currentAd} alt="advertisement" className="h-36 rounded-lg" />
+      <div className="space-y-4 mb-8 px-2">
+        <div className="flex items-center text-sm text-gray-600">
+          <HiOutlineLocationMarker className="mr-3 text-lg text-blue-500" />
+          <span>San Francisco, CA</span>
+        </div>
+        <div className="flex items-center text-sm text-gray-600">
+          <HiOutlineBriefcase className="mr-3 text-lg text-purple-500" />
+          <span>Frontend Developer</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 mb-8 px-2">
+        <button className="flex items-center justify-center py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+          <FiUsers className="mr-2" />
+          <span>Groups</span>
+        </button>
+        <button className="flex items-center justify-center py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+          <FiPlusCircle className="mr-2" />
+          <span>Invite</span>
+        </button>
+        <button className="col-span-2 flex items-center justify-center py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+          <FiMoreHorizontal className="mr-2" />
+          <span>More</span>
+        </button>
+      </div>
+
+      <div className="px-2">
+        <h4 className="font-semibold text-gray-900 mb-3">Social Profiles</h4>
+        <div className="space-y-3">
+          <a href="#" className="flex items-center p-2 rounded-lg hover:bg-gray-100 transition">
+            <FiFacebook className="text-blue-600 mr-3" />
+            <span>Facebook</span>
+          </a>
+          <a href="#" className="flex items-center p-2 rounded-lg hover:bg-gray-100 transition">
+            <FiTwitter className="text-blue-400 mr-3" />
+            <span>Twitter</span>
+          </a>
+        </div>
       </div>
     </div>
   );
