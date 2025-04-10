@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../AppContext/AppContext';
 
@@ -54,6 +54,14 @@ const NavLink = ({ to, icon, label }) => (
 const Navbar = () => {
   const { currentUser, signOutUser } = useAppContext();
   const navigate = useNavigate();
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  
+  const notifications = [
+    { id: 1, message: 'John Doe liked your post', time: '2m ago', read: false },
+    { id: 2, message: 'New connection request from Jane Smith', time: '5m ago', read: false },
+    { id: 3, message: 'Your post has 10 new comments', time: '1h ago', read: true },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -91,10 +99,48 @@ const Navbar = () => {
             <NavLink to="/messages" icon={<MailIcon />} label="Messages" />
           </div>
           <div className="flex items-center space-x-4">
-            <Link to="/notifications" className="p-2 rounded-full hover:bg-gray-100 text-gray-700 hover:text-indigo-600 transition-all">
-              <BellIcon />
-              <span className="sr-only">Notifications</span>
-            </Link>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-700 hover:text-indigo-600 transition-all relative"
+              >
+                <BellIcon />
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                )}
+                <span className="sr-only">Notifications</span>
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-10">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifications.length > 0 ? (
+                      notifications.map((notification) => (
+                        <div 
+                          key={notification.id}
+                          className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-indigo-50' : ''}`}
+                        >
+                          <p className="text-sm text-gray-900">{notification.message}</p>
+                          <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-gray-500">
+                        No new notifications
+                      </div>
+                    )}
+                  </div>
+                  <div className="px-4 py-2 border-t border-gray-100">
+                    <button className="text-sm text-indigo-600 hover:text-indigo-800">
+                      Mark all as read
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             
             {currentUser ? (
               <div className="relative group">
