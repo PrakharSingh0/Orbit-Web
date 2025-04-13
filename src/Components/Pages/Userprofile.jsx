@@ -22,6 +22,7 @@ const UserProfile = () => {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         if (userData) {
@@ -34,6 +35,82 @@ const UserProfile = () => {
             });
         }
     }, [userData]);
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            setError('Please upload an image file');
+            return;
+        }
+
+        // Validate file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            setError('Image size should be less than 5MB');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+        formData.append('cloud_name', import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+        formData.append('api_key', import.meta.env.VITE_CLOUDINARY_API_KEY);
+
+        try {
+            setUploading(true);
+            setError(null);
+            
+            console.log('Uploading image to Cloudinary...');
+            console.log('Cloudinary Configuration:', {
+                url: import.meta.env.VITE_CLOUDINARY_URL,
+                preset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET,
+                cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
+                apiKey: import.meta.env.VITE_CLOUDINARY_API_KEY
+            });
+
+            const response = await fetch(import.meta.env.VITE_CLOUDINARY_URL, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const responseText = await response.text();
+            console.log('Cloudinary Response:', responseText);
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Cloudinary authentication failed. Please check your upload preset and API key configuration.');
+                }
+                throw new Error(`Failed to upload image: ${response.status} ${response.statusText}`);
+            }
+
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('Failed to parse Cloudinary response:', parseError);
+                throw new Error('Invalid response from Cloudinary');
+            }
+
+            if (!data.secure_url) {
+                throw new Error('No secure URL returned from Cloudinary');
+            }
+
+            console.log('Image uploaded successfully:', data.secure_url);
+            
+            await updateDoc(doc(db, 'users', user.uid), {
+                image: data.secure_url
+            });
+
+            setSuccess('Profile picture updated successfully');
+        } catch (err) {
+            console.error('Image upload error:', err);
+            setError(err.message || 'Failed to upload image. Please try again.');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -163,12 +240,47 @@ const UserProfile = () => {
                                     alt="profilePic"
                                 />
                                 <div className="absolute bottom-10 left-6">
-                                    <Avatar
-                                        size="xl"
-                                        variant="circular"
-                                        src={user?.photoURL || avatar}
-                                        alt="avatar"
-                                    />
+                                    <div className="relative">
+                                        <Avatar
+                                            size="xl"
+                                            variant="circular"
+                                            src={userData?.image || user?.photoURL || avatar}
+                                            alt="avatar"
+                                        />
+                                        {editMode && (
+                                            <label className="absolute bottom-0 right-0 bg-white rounded-full p-2 cursor-pointer">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageUpload}
+                                                    className="hidden"
+                                                    disabled={uploading}
+                                                />
+                                                <svg
+                                                    className="w-6 h-6 text-gray-600"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                                                    />
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                                                    />
+                                                </svg>
+                                            </label>
+                                        )}
+                                    </div>
+                                    {uploading && (
+                                        <div className="text-white text-sm mt-2">Uploading image...</div>
+                                    )}
                                     <p className="py-2 font-roboto font-medium text-sm text-white no-underline tracking-normal leading-none">
                                         {userData?.email}
                                     </p>

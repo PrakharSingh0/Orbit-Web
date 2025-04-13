@@ -2,7 +2,7 @@ import React, { useContext, useRef, useReducer, useEffect } from "react";
 import { Avatar } from "@material-tailwind/react";
 import { Input } from "@material-tailwind/react";
 import avatar from "../../assets/images/avatar.jpg";
-import { AuthContext } from "../AppContext/AppContext";
+import { useAppContext } from "../AppContext/AppContext";
 import {
   setDoc,
   collection,
@@ -22,7 +22,7 @@ import Comment from "./Comment";
 
 const CommentSection = ({ postId }) => {
   const comment = useRef("");
-  const { user, userData } = useContext(AuthContext);
+  const { currentUser, userData } = useAppContext();
   const commentRef = doc(collection(db, "posts", postId, "comments"));
   const [state, dispatch] = useReducer(PostsReducer, postsStates);
   const { ADD_COMMENT, HANDLE_ERROR } = postActions;
@@ -34,10 +34,10 @@ const CommentSection = ({ postId }) => {
         await setDoc(commentRef, {
           id: commentRef.id,
           comment: comment.current.value,
-          image: user?.photoURL,
+          image: currentUser?.photoURL,
           name:
             userData?.name?.charAt(0)?.toUpperCase() +
-              userData?.name?.slice(1) || user?.displayName?.split(" ")[0],
+              userData?.name?.slice(1) || currentUser?.displayName?.split(" ")[0],
           timestamp: serverTimestamp(),
         });
         comment.current.value = "";
@@ -76,7 +76,7 @@ const CommentSection = ({ postId }) => {
           <Avatar
             size="sm"
             variant="circular"
-            src={user?.photoURL || avatar}
+            src={currentUser?.photoURL || avatar}
           ></Avatar>
         </div>
         <div className="w-full pr-2">

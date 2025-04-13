@@ -1,139 +1,59 @@
-import React, { createContext, useState, useEffect } from "react";
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signOut,
-  onAuthStateChanged,
-} from "firebase/auth";
-import { auth, db } from "../firebase/firebase";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  onSnapshot,
-} from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { auth, db } from '../firebase/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { useAuth } from './AuthContext';
 
-export const AuthContext = createContext();
+const AppContext = createContext();
 
-const AppContext = ({ children }) => {
-  const navigate = useNavigate();
-  const collectionUsersRef = collection(db, "users");
-  const provider = new GoogleAuthProvider();
+export const useAppContext = () => useContext(AppContext);
 
-  const [currentUser, setCurrentUser] = useState(null);
+export const AppProvider = ({ children }) => {
+  const { currentUser } = useAuth();
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const signInWithGoogle = async () => {
-    try {
-      const popup = await signInWithPopup(auth, provider);
-      const user = popup.user;
-
-      const q = query(collectionUsersRef, where("uid", "==", user.uid));
-      const docs = await getDocs(q);
-
-      if (docs.empty) {
-        await addDoc(collectionUsersRef, {
-          uid: user.uid,
-          name: user.displayName,
-          email: user.email,
-          image: user.photoURL,
-          authProvider: popup.providerId,
-        });
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (currentUser) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          if (userDoc.exists()) {
+            setUserData(userDoc.data());
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      } else {
+        setUserData(null);
       }
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+      setLoading(false);
+    };
 
-  const loginWithEmailAndPassword = async (email, password) => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
-  const registerWithEmailAndPassword = async (name, email, password) => {
-    try {
-      const res = await createUserWithEmailAndPassword(auth, email, password);
-      const user = res.user;
-
-      await addDoc(collectionUsersRef, {
-        uid: user.uid,
-        name,
-        providerId: "email/password",
-        email: user.email,
-      });
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
-  const sendPasswordToUser = async (email) => {
-    try {
-      await sendPasswordResetEmail(auth, email);
-      alert("Check your email for reset link.");
-    } catch (err) {
-      alert(err.message);
-    }
-  };
+    fetchUserData();
+  }, [currentUser]);
 
   const signOutUser = async () => {
     try {
-      await signOut(auth);
-      setCurrentUser(null);
-      setUserData(null);
-      navigate("/login");
-    } catch (err) {
-      alert(err.message);
+      await auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setCurrentUser(user);
-
-        const q = query(collectionUsersRef, where("uid", "==", user.uid));
-        const unsub = onSnapshot(q, (snapshot) => {
-          if (!snapshot.empty) {
-            setUserData(snapshot.docs[0].data());
-          }
-        });
-
-        return () => unsub();
-      } else {
-        setCurrentUser(null);
-        setUserData(null);
-        navigate("/login");
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const value = {
+    currentUser,
+    userData,
+    loading,
+    signOutUser,
+  };
 
   return (
-    <AuthContext.Provider
-      value={{
-        currentUser,
-        userData,
-        signInWithGoogle,
-        loginWithEmailAndPassword,
-        registerWithEmailAndPassword,
-        sendPasswordToUser,
-        signOutUser,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AppContext.Provider value={value}>
+      {!loading && children}
+    </AppContext.Provider>
   );
 };
 
-export const useAppContext = () => React.useContext(AuthContext);
-export default AppContext;
+export default AppContext; 
