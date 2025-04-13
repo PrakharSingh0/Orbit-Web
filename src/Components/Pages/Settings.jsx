@@ -12,7 +12,7 @@ const Settings = () => {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">Help and Support</h2>
           
-          {/* FAQ Section */}
+          
           <div className="mb-6">
             <div className="flex items-center mb-4">
               <FaQuestionCircle className="text-blue-500 text-xl mr-2" />
@@ -34,7 +34,7 @@ const Settings = () => {
             </div>
           </div>
 
-          {/* Contact Support */}
+          
           <div className="mb-6">
             <div className="flex items-center mb-4">
               <FaEnvelope className="text-green-500 text-xl mr-2" />
@@ -50,7 +50,7 @@ const Settings = () => {
             </button>
           </div>
 
-          {/* Contact Modal */}
+          
           {showContactModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -94,7 +94,7 @@ const Settings = () => {
             </div>
           )}
 
-          {/* Documentation */}
+          
           <div className="mb-6">
             <div className="flex items-center mb-4">
               <FaBook className="text-purple-500 text-xl mr-2" />
@@ -106,7 +106,7 @@ const Settings = () => {
             </button>
           </div>
 
-          {/* Troubleshooting */}
+          
           <div>
             <div className="flex items-center mb-4">
               <FaTools className="text-orange-500 text-xl mr-2" />
