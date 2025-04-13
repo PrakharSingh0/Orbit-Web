@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const NavLinks = () => {
   
   return (
-    <div className="flex justify-center items-center cursor-pointer">
+    <div className="flex justify-center items-center cursor-pointer text-[#67e8f9]">
       <Link to="/" className="hover:translate-y-1 duration-500 ease-in-out hover:text-blue-500">
         <svg
           xmlns="http://www.w3.org/2000/svg"

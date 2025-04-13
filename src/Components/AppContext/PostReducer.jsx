@@ -27,6 +27,7 @@ export const PostsReducer = (state, action) => {
         likes: action.likes,
       };
     case postActions.ADD_COMMENT:
+      
       return {
         ...state,
         error: false,

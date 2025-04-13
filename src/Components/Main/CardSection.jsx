@@ -5,7 +5,7 @@ import Card from "./Card";
 const CardSection = () => {
   return (
     <div>
-      <div className="grid grid-cols-5 gap-2 pt-8 mb-10">
+      <div className="grid grid-cols-5 gap-2 pt-8 mb-10 text-white border-2 border-[#bbf7d0]">
         {cardData.map((card) => {
           return (
             <div key={card.id}>

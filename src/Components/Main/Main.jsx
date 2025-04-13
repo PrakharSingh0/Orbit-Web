@@ -97,7 +97,7 @@ const Main = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex flex-col py-4 w-full bg-white rounded-3xl shadow-lg">
+      <div className="flex flex-col py-4 w-full  rounded-3xl shadow-lg bg-blue-gray-600">
         <div className="flex items-center border-b-2 border-gray-300 pb-4 pl-4 w-full">
           <Avatar
             size="sm"
@@ -144,11 +144,11 @@ const Main = () => {
           </div>
           <div className="flex items-center">
             <img className="h-10 mr-4" src={live} alt="live" />
-            <p className="text-gray-700 font-medium">Live</p>
+            <p className="text-white    font-medium">Live</p>
           </div>
           <div className="flex items-center">
             <img className="h-10 mr-4" src={smile} alt="feeling" />
-            <p className="text-gray-700 font-medium">Feeling</p>
+            <p className="text-white    font-medium">Feeling</p>
           </div>
         </div>
       </div>

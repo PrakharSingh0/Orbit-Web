@@ -9,7 +9,7 @@ const UserLinks = () => {
   const { signOutUser, user, userData } = useContext(AuthContext);
 
   return (
-    <div className="flex justify-center items-center cursor-pointer">
+    <div className="flex justify-center items-center cursor-pointer text-[#67e8f9]">
       <div className="hover:translate-y-1 duration-500 ease-in-out hover:text-blue-500">
       <Link to="/userprofile" className="hover:translate-y-1 duration-500 ease-in-out hover:text-blue-500">
         <svg
@@ -73,7 +73,7 @@ const UserLinks = () => {
           </Link>
         </Tooltip>
         <div className="flex items-center" onClick={signOutUser}>
-          <p className="ml-4 font-roboto text-sm text-black font-medium no-underline cursor-pointer">
+          <p className="ml-4 font-roboto text-sm text-[#67e8f9] font-medium no-underline cursor-pointer">
             {user?.displayName === null && userData?.name !== undefined
               ? userData?.name?.charAt(0)?.toUpperCase() +
                 userData?.name?.slice(1)

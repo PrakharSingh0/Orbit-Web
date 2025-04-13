@@ -13,11 +13,11 @@ const Comment = ({ name, comment, image }) => {
           src={image || avatar}
         ></Avatar>
       </div>
-      <div className="flex flex-col items-start bg-gray-100 rounded-2xl p-1 max-w-[600px]">
-        <p className="font-roboto text-black text-sm no-underline tracking-normal leading-none p-1 font-medium">
+      <div className="flex flex-col items-start bg-gray-200 rounded-2xl p-1 max-w-[600px]">
+        <p className="font-roboto text-white text-sm no-underline tracking-normal leading-none p-1 font-medium">
           {name}
         </p>
-        <p className="font-roboto text-black text-sm no-underline tracking-normal leading-none p-1 font-medium">
+        <p className="font-roboto text-white text-sm no-underline tracking-normal leading-none p-1 font-medium">
           {comment}
         </p>
       </div>

@@ -91,7 +91,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f172a] text-[#67e8f9] backdrop-blur-md border-b border-gray-100 shadow-sm ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
 
@@ -102,14 +102,14 @@ const Navbar = () => {
               className="h-12 w-auto"
             />
           </Link>
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-8 text-[#67e8f9]">
             <NavLink to="/" icon={<HomeIcon />} label="Home" />
             <NavLink to="/explore" icon={<CompassIcon />} label="Explore" />
             <NavLink to="/network" icon={<BriefcaseIcon />} label="Network" />
             <div className="relative">
               <Link 
                 to="/messages"
-                className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors group"
+                className="flex items-center space-x-2  hover:text-indigo-600 transition-colors group"
               >
                 <div className="p-1.5 rounded-lg group-hover:bg-indigo-50 transition-all">
                   <MailIcon />
@@ -125,7 +125,7 @@ const Navbar = () => {
             <div className="relative">
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-700 hover:text-indigo-600 transition-all relative"
+                className="p-2 rounded-full hover:bg-gray-100  hover:text-indigo-600 transition-all relative"
               >
                 <BellIcon />
                 {notifications.some(n => !n.read) && (
@@ -135,9 +135,9 @@ const Navbar = () => {
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-10">
+                <div className="absolute right-0 mt-2 w-80  rounded-md shadow-lg py-1 z-10">
                   <div className="px-4 py-2 border-b border-gray-100">
-                    <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
+                    <h3 className="text-sm font-medium ">Notifications</h3>
                   </div>
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.length > 0 ? (
@@ -146,8 +146,8 @@ const Navbar = () => {
                           key={notification.id}
                           className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-indigo-50' : ''}`}
                         >
-                          <p className="text-sm text-gray-900">{notification.message}</p>
-                          <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                          <p className="text-sm ">{notification.message}</p>
+                          <p className="text-xs  mt-1">{notification.time}</p>
                         </div>
                       ))
                     ) : (
@@ -175,39 +175,39 @@ const Navbar = () => {
                       className="h-8 w-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center ">
                       <UserIcon />
                     </div>
                   )}
-                  <span className="hidden md:inline-block text-sm font-medium text-gray-700 group-hover:text-indigo-600">
+                  <span className="hidden md:inline-block text-sm font-medium  group-hover:text-indigo-600">
                     {currentUser.displayName || "Profile"}
                   </span>
                 </button>
 
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
-                  <Link to={`/profile/${currentUser.uid}`} className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <div className="absolute right-0 mt-2 w-48  rounded-md shadow-lg py-1 z-10 hidden group-hover:block">
+                  <Link to={`/profile/${currentUser.uid}`} className="block px-4 py-2 text-sm  hover:bg-indigo-50 hover:text-indigo-600">
                     Your Profile
                   </Link>
-                  <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600">
+                  <Link to="/settings" className="block px-4 py-2 text-sm t hover:bg-indigo-50 hover:text-indigo-600">
                     Settings
                   </Link>
                   <button 
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600"
+                    className="block w-full text-left px-4 py-2 text-sm  hover:bg-indigo-50 hover:text-indigo-600"
                   >
                     Sign Out
                   </button>
                 </div>
               </div>
             ) : (
-              <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-indigo-600">
+              <Link to="/login" className="text-sm font-medium  hover:text-indigo-600">
                 Sign In
               </Link>
             )}
             
             <button 
               onClick={handleCreatePost}
-              className="hidden md:block bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium hover:shadow-md transition-all"
+              className="hidden md:block bg-gradient-to-r from-indigo-600 to-purple-600  px-4 py-1.5 rounded-full text-sm font-medium hover:shadow-md transition-all"
             >
               Create Post
             </button>

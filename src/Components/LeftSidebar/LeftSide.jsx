@@ -69,7 +69,7 @@ const LeftSide = () => {
   };
 
   return (
-    <div className="hidden lg:flex flex-col h-screen sticky top-0 bg-white border-r border-gray-100 shadow-md p-4 overflow-y-auto">
+    <div className="hidden lg:flex flex-col h-screen sticky top-0 bg-[#0f172a] border-gray-100 shadow-md p-4 overflow-y-auto text-white border-2 border-[#bbf7d0]">
 
       <div className="relative mb-8">
         <div className="h-24 w-full rounded-xl bg-gradient-to-r from-indigo-500 to-pink-500"></div>
@@ -89,7 +89,7 @@ const LeftSide = () => {
 
 
       <div className="text-center mt-12 mb-6">
-        <h3 className="text-lg font-semibold text-gray-800">
+        <h3 className="text-lg font-semibold text-white   ">
           {currentUser?.displayName || userData?.name || "Username"}
         </h3>
         <p className="text-gray-500 text-sm">
@@ -107,47 +107,47 @@ const LeftSide = () => {
 
       <div className="flex justify-between mb-6 px-4 text-center">
         <div>
-          <p className="text-md font-bold text-gray-800">{followers.length}</p>
+          <p className="text-md font-bold text-white   ">{followers.length}</p>
           <p className="text-xs text-gray-500">Followers</p>
         </div>
         <div>
-          <p className="text-md font-bold text-gray-800">{following.length}</p>
+          <p className="text-md font-bold text-white   ">{following.length}</p>
           <p className="text-xs text-gray-500">Following</p>
         </div>
         <div>
-          <p className="text-md font-bold text-gray-800">24</p>
-          <p className="text-xs text-gray-500">Posts</p>
+          <p className="text-md font-bold text-white   ">24</p>
+          <p className="text-xs text-white   ">Posts</p>
         </div>
       </div>
 
       <div className="space-y-4 mb-8 px-2">
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-sm text-white   ">
           <HiOutlineLocationMarker className="mr-3 text-lg text-blue-500" />
           <span>San Francisco, CA</span>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
+        <div className="flex items-center text-sm text-white   ">
           <HiOutlineBriefcase className="mr-3 text-lg text-purple-500" />
           <span>Frontend Developer</span>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-2 mb-8 px-2">
-        <button className="flex items-center justify-center py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+        <button className="flex items-center justify-center py-2 bg-[#0f172a] hover:bg-gray-200 transition-colors">
           <FiUsers className="mr-2" />
           <span>Groups</span>
         </button>
-        <button className="flex items-center justify-center py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+        <button className="flex items-center justify-center py-2 bg-[#0f172a] hover:bg-gray-200 transition-colors">
           <FiPlusCircle className="mr-2" />
           <span>Invite</span>
         </button>
-        <button className="col-span-2 flex items-center justify-center py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+        <button className="col-span-2 flex items-center justify-center py-2 bg-[#0f172a] hover:bg-gray-200 transition-colors">
           <FiMoreHorizontal className="mr-2" />
           <span>More</span>
         </button>
       </div>
 
       <div className="px-2">
-        <h4 className="font-semibold text-gray-900 mb-3">Social Profiles</h4>
+        <h4 className="font-semibold text-white    mb-3">Social Profiles</h4>
         <div className="space-y-3">
           <a href="#" className="flex items-center p-2 rounded-lg hover:bg-gray-100 transition">
             <FiFacebook className="text-blue-600 mr-3" />

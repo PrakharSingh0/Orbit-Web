@@ -113,7 +113,7 @@ const PostCard = ({ uid, id, logo, name, email, text, image, timestamp }) => {
 
   return (
     <div className="mb-4">
-      <div className="flex flex-col py-4 bg-white rounded-t-3xl">
+      <div className="flex flex-col py-4  bg-[#111b31] rounded-t-3xl text-white border-2 border-[#bbf7d0]">
         <div className="flex justify-start items-center pb-4 pl-4 ">
           <Avatar
             size="sm"
@@ -123,10 +123,10 @@ const PostCard = ({ uid, id, logo, name, email, text, image, timestamp }) => {
           ></Avatar>
 
           <div className="flex flex-col ml-4">
-            <p className=" py-2 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none">
+            <p className=" py-2 font-roboto font-medium text-sm text-white no-underline tracking-normal leading-none">
               {email}
             </p>
-            <p className=" font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none">
+            <p className=" font-roboto font-medium text-sm text-white no-underline tracking-normal leading-none">
               Published: {timestamp}
             </p>
           </div>
@@ -144,7 +144,7 @@ const PostCard = ({ uid, id, logo, name, email, text, image, timestamp }) => {
           )}
         </div>
         <div>
-          <p className="ml-4 pb-4 font-roboto font-medium text-sm text-gray-700 no-underline tracking-normal leading-none">
+          <p className="ml-4 pb-4 font-roboto font-medium text-sm text-white no-underline tracking-normal leading-none">
             {text}
           </p>
           {image && (
@@ -165,7 +165,7 @@ const PostCard = ({ uid, id, logo, name, email, text, image, timestamp }) => {
           >
             <div className="flex items-center cursor-pointer">
               <img className="h-8 mr-4" src={comment} alt="comment"></img>
-              <p className="font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none">
+              <p className="font-roboto font-medium text-md text-white no-underline tracking-normal leading-none">
                 Comments
               </p>
             </div>
@@ -175,7 +175,7 @@ const PostCard = ({ uid, id, logo, name, email, text, image, timestamp }) => {
             onClick={deletePost}
           >
             <img className="h-8 mr-4" src={remove} alt="delete"></img>
-            <p className="font-roboto font-medium text-md text-gray-700 no-underline tracking-normal leading-none">
+            <p className="font-roboto font-medium text-md text-white no-underline tracking-normal leading-none">
               Delete
             </p>
           </div>
