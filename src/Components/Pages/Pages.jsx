@@ -6,6 +6,7 @@ import Register from "./Register";
 import Reset from "./Reset";
 import FriendProfile from "./FriendProfile";
 import UserProfile from "./Userprofile";
+import Settings from "./Settings";
 
 const Pages = () => {
   return (
@@ -22,6 +23,10 @@ const Pages = () => {
         <Route
           path="/userprofile"
           element={<UserProfile></UserProfile>}
+        ></Route>
+        <Route
+          path="/settings"
+          element={<Settings></Settings>}
         ></Route>
       </Routes>
     </div>
