@@ -104,8 +104,7 @@ const Navbar = () => {
           </Link>
           <div className="hidden md:flex items-center space-x-8 text-[#67e8f9]">
             <NavLink to="/" icon={<HomeIcon />} label="Home" />
-            <NavLink to="/explore" icon={<CompassIcon />} label="Explore" />
-            <NavLink to="/network" icon={<BriefcaseIcon />} label="Network" />
+           
             <div className="relative">
               <Link 
                 to="/messages"
