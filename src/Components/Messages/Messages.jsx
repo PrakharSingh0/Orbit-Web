@@ -72,11 +72,11 @@ const Messages = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-[#0f172a]">
       {/* Messages List */}
-      <div className="w-1/3 border-r border-gray-200 bg-white">
+      <div className="w-1/3 border-r border-gray-200 bg-[#0f172a]">
         <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
+          <h2 className="text-xl font-semibold text-[#67e8f9]">Messages</h2>
           <Link 
             to="/"
             className="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center space-x-1"
