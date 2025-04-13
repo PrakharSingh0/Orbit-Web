@@ -55,12 +55,22 @@ const Navbar = () => {
   const { currentUser, signOutUser } = useAppContext();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
 
-  
   const notifications = [
     { id: 1, message: 'John Doe liked your post', time: '2m ago', read: false },
     { id: 2, message: 'New connection request from Jane Smith', time: '5m ago', read: false },
     { id: 3, message: 'Your post has 10 new comments', time: '1h ago', read: true },
+    { id: 4, message: 'Alice Johnson shared your post', time: '3h ago', read: false },
+    { id: 5, message: 'New job opportunity at Tech Corp', time: '1d ago', read: true },
+  ];
+
+  const messages = [
+    { id: 1, sender: 'John Doe', message: 'Hey, how are you doing?', time: '2m ago', unread: true },
+    { id: 2, sender: 'Jane Smith', message: 'Can we discuss the project tomorrow?', time: '5m ago', unread: true },
+    { id: 3, sender: 'Mike Johnson', message: 'Thanks for the help!', time: '1h ago', unread: false },
+    { id: 4, sender: 'Sarah Wilson', message: 'Meeting at 3 PM?', time: '3h ago', unread: false },
+    { id: 5, sender: 'David Brown', message: 'Please check the document', time: '1d ago', unread: true },
   ];
 
   const handleLogout = async () => {
@@ -96,7 +106,20 @@ const Navbar = () => {
             <NavLink to="/" icon={<HomeIcon />} label="Home" />
             <NavLink to="/explore" icon={<CompassIcon />} label="Explore" />
             <NavLink to="/network" icon={<BriefcaseIcon />} label="Network" />
-            <NavLink to="/messages" icon={<MailIcon />} label="Messages" />
+            <div className="relative">
+              <Link 
+                to="/messages"
+                className="flex items-center space-x-2 text-gray-600 hover:text-indigo-600 transition-colors group"
+              >
+                <div className="p-1.5 rounded-lg group-hover:bg-indigo-50 transition-all">
+                  <MailIcon />
+                </div>
+                <span className="text-sm font-medium">Messages</span>
+                {messages.some(m => m.unread) && (
+                  <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                )}
+              </Link>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             <div className="relative">
