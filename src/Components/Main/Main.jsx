@@ -1,11 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Avatar,
-  Button,
-  IconButton,
-  Input,
-  Textarea
-} from "@material-tailwind/react";
+import { Avatar, Button, IconButton } from "@material-tailwind/react";
 import { useAppContext } from "../AppContext/AppContext";
 import {
   collection,
@@ -19,13 +13,8 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import PostCard from "./PostCard";
-import {
-  PhotoIcon,
-  LinkIcon,
-  XMarkIcon,
-  PaperAirplaneIcon,
-  CloudArrowUpIcon
-} from "@heroicons/react/24/solid";
+import UserCards from "./UserCards";
+import { PhotoIcon, LinkIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import Navbar from "../Navbar/Navbar";
 
@@ -90,7 +79,7 @@ const Main = () => {
   const handleSubmitPost = async (e) => {
     e.preventDefault();
     const postContent = text.current.value.trim();
-
+    
     if (!postContent) {
       setError("Please write something to post");
       return;
@@ -168,11 +157,10 @@ const Main = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-gray-100">
       <Navbar />
-      <div className="max-w-2xl mx-auto px-4 pt-4 pb-8">
-        {/* Post Creation Form */}
-        <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-6 transition-transform transform hover:scale-105">
+      <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="bg-gray-800 rounded-3xl shadow-xl p-4 mb-4">
           <form onSubmit={handleSubmitPost}>
             <div className="flex items-start space-x-4">
               <Avatar
@@ -182,37 +170,37 @@ const Main = () => {
                 alt="avatar"
               />
               <div className="flex-1">
-                <Input
-                  variant="standard"
-                  placeholder="Add a caption..."
-                  value={caption}
-                  onChange={(e) => setCaption(e.target.value)}
-                  className="text-white placeholder:text-gray-400 mb-2"
-                />
-                <Textarea
-                  inputRef={text}
-                  variant="standard"
-                  placeholder={`What's on your mind, ${currentUser?.displayName?.split(" ")[0] || userData?.userName}?`}
-                  className="text-white placeholder:text-gray-400"
-                  rows={3}
-                />
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Add a caption..."
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <textarea
+                    ref={text}
+                    placeholder={`What's on your mind, ${currentUser?.displayName?.split(" ")[0] || userData?.userName}?`}
+                    className="w-full bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-400 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows="3"
+                  />
+                </div>
                 {error && (
-                  <div className="text-red-400 text-sm mt-1">{error}</div>
+                  <div className="text-red-400 text-sm mb-2">{error}</div>
                 )}
                 {showLinkInput && (
                   <div className="mt-2">
-                    <Input
-                      variant="standard"
+                    <input
                       type="url"
                       placeholder="Add a link (optional)"
                       value={link}
                       onChange={(e) => setLink(e.target.value)}
-                      className="text-white placeholder:text-gray-400"
+                      className="w-full bg-gray-700 border border-gray-600 text-gray-100 placeholder-gray-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     {link && (
-                      <a 
-                        href={link} 
-                        target="_blank" 
+                      <a
+                        href={link}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-400 text-sm hover:underline mt-1 inline-block"
                       >
@@ -226,7 +214,7 @@ const Main = () => {
                     <img
                       src={imageUrl}
                       alt="preview"
-                      className="w-full rounded-xl object-cover transition-all transform hover:scale-105"
+                      className="w-full rounded-xl object-cover"
                     />
                     <button
                       type="button"
@@ -235,15 +223,15 @@ const Main = () => {
                         setFile(null);
                         setImageUrl("");
                       }}
-                      className="absolute top-2 right-2 bg-gray-700 rounded-full p-1 shadow-md hover:bg-gray-600"
+                      className="absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 rounded-full p-1 shadow-md"
                     >
-                      <XMarkIcon className="h-5 w-5 text-white" />
+                      <XMarkIcon className="h-5 w-5 text-gray-300" />
                     </button>
                   </div>
                 )}
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
                   <div className="flex items-center space-x-4">
-                    <label className="cursor-pointer text-gray-400 hover:text-blue-400 transition">
+                    <label className="cursor-pointer text-gray-400 hover:text-blue-400">
                       <PhotoIcon className="h-6 w-6" />
                       <input
                         type="file"
@@ -255,19 +243,18 @@ const Main = () => {
                     <button
                       type="button"
                       onClick={() => setShowLinkInput(!showLinkInput)}
-                      className="text-gray-400 hover:text-blue-400 transition"
+                      className="text-gray-400 hover:text-blue-400"
                     >
                       <LinkIcon className="h-6 w-6" />
                     </button>
                     {file && (
                       <Button
-                        variant="outlined"
-                        size="sm"
+                        variant="text"
                         onClick={uploadToCloudinary}
                         disabled={loading}
-                        className="text-sm border-blue-500 text-blue-400"
+                        className="text-sm text-blue-400 hover:text-blue-300"
                       >
-                        {loading ? "Uploading..." : <><CloudArrowUpIcon className="h-4 w-4 inline-block mr-1" />Upload</>}
+                        {loading ? "Uploading..." : "Upload"}
                       </Button>
                     )}
                   </div>
@@ -275,9 +262,9 @@ const Main = () => {
                     type="submit"
                     color="blue"
                     disabled={loading || !text.current?.value}
-                    className="rounded-full px-6 flex items-center gap-2 transition-all transform hover:scale-105"
+                    className="rounded-full px-6"
                   >
-                    {loading ? "Posting..." : <><PaperAirplaneIcon className="h-5 w-5" /> Post</>}
+                    {loading ? "Posting..." : "Post"}
                   </Button>
                 </div>
               </div>
@@ -285,8 +272,9 @@ const Main = () => {
           </form>
         </div>
 
-        {/* Posts */}
-        <div className="space-y-6">
+        <UserCards />
+
+        <div className="space-y-4">
           {posts.map((post) => (
             <PostCard
               key={post.postId}

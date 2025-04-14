@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect, useReducer } from "react";
-import { Avatar, Button, IconButton, Input } from "@material-tailwind/react";
+import React, { useState, useEffect } from "react";
+import { Avatar, Button, Input } from "@material-tailwind/react";
 import avatar from "../../assets/images/avatar.jpg";
 import {
   HeartIcon,
@@ -29,14 +29,8 @@ import {
   serverTimestamp,
   orderBy,
 } from "firebase/firestore";
-
 import { db } from "../firebase/firebase";
 import { useAppContext } from "../AppContext/AppContext";
-import {
-  PostsReducer,
-  postActions,
-  postsStates,
-} from "../AppContext/PostReducer";
 
 const PostCard = ({
   postId,
@@ -51,10 +45,6 @@ const PostCard = ({
   timestamp,
 }) => {
   const { currentUser, userData } = useAppContext();
-  const [state, dispatch] = useReducer(PostsReducer, postsStates);
-  const singlePostDocument = doc(db, "posts", postId);
-  const { ADD_LIKE, HANDLE_ERROR } = postActions;
-  const [open, setOpen] = useState(false);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likes, setLikes] = useState([]);
@@ -211,8 +201,26 @@ const PostCard = ({
     }
   };
 
+  const handleDelete = async () => {
+    if (!currentUser || currentUser.uid !== uid) {
+      setError("You can only delete your own posts.");
+      return;
+    }
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this post?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, "posts", postId));
+      setError("");
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      setError("Failed to delete the post.");
+    }
+  };
+
   return (
-    <div className="w-full bg-white rounded-3xl shadow-lg p-4 mb-4">
+    <div className="w-full bg-[#1e1e1e] rounded-3xl shadow-md p-4 mb-4 text-gray-100">
       {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
 
       <div className="flex items-center mb-4">
@@ -224,14 +232,14 @@ const PostCard = ({
           className="mr-3"
         />
         <div>
-          <h3 className="font-medium text-gray-900">{userName}</h3>
-          <p className="text-sm text-gray-500">@{userTag}</p>
+          <h3 className="font-medium text-white">{userName}</h3>
+          <p className="text-sm text-gray-400">@{userTag}</p>
         </div>
       </div>
 
       <div className="mb-4">
-        <p className="text-gray-800">{body || ""}</p>
-        {caption && <p className="text-gray-600 text-sm mt-2">{caption}</p>}
+        <p className="text-gray-200">{body || ""}</p>
+        {caption && <p className="text-gray-400 text-sm mt-2">{caption}</p>}
       </div>
 
       {imageUrl && (
@@ -239,7 +247,8 @@ const PostCard = ({
           <img
             src={imageUrl}
             alt="post"
-            className="w-full rounded-xl object-cover"
+            className="w-full rounded-xl object-contain max-h-[500px]"
+            loading="lazy"
           />
         </div>
       )}
@@ -265,86 +274,79 @@ const PostCard = ({
         </div>
       </div>
 
-      <div className="flex justify-between border-t border-gray-200 pt-4">
-        <Button
-          variant="text"
-          className="flex items-center gap-2"
-          onClick={handleLike}
-        >
+      <div className="flex justify-between border-t border-gray-700 pt-4 flex-wrap gap-2">
+        <Button variant="text" className="flex items-center gap-2" onClick={handleLike}>
           {liked ? (
-            <HeartIconSolid className="h-5 w-5 text-red-500" />
+            <HeartIconSolid className="w-5 h-5 text-red-500" />
           ) : (
-            <HeartIcon className="h-5 w-5" />
+            <HeartIcon className="w-5 h-5 text-gray-500" />
           )}
           Like
         </Button>
-        <Button
-          variant="text"
-          className="flex items-center gap-2"
-          onClick={() => setShowComments(!showComments)}
-        >
-          <ChatBubbleLeftIcon className="h-5 w-5" />
+
+        <Button variant="text" className="flex items-center gap-2" onClick={() => setShowComments(!showComments)}>
+          <ChatBubbleLeftIcon className="w-5 h-5 text-gray-500" />
           Comment
         </Button>
+
         <Button variant="text" className="flex items-center gap-2">
-          <ShareIcon className="h-5 w-5" />
+          <ShareIcon className="w-5 h-5 text-gray-500" />
           Share
         </Button>
-        <IconButton variant="text" onClick={handleSave}>
+
+        <Button variant="text" className="flex items-center gap-2" onClick={handleSave}>
           {saved ? (
-            <BookmarkIconSolid className="h-5 w-5 text-blue-500" />
+            <BookmarkIconSolid className="w-5 h-5 text-yellow-500" />
           ) : (
-            <BookmarkIcon className="h-5 w-5" />
+            <BookmarkIcon className="w-5 h-5 text-gray-500" />
           )}
-        </IconButton>
+          Save
+        </Button>
+
+        {currentUser?.uid === uid && (
+          <Button variant="text" className="flex items-center gap-2" onClick={handleDelete}>
+            <PaperAirplaneIcon className="w-5 h-5 text-gray-500" />
+            Delete
+          </Button>
+        )}
       </div>
 
       {showComments && (
-        <div className="mt-4 border-t border-gray-200 pt-4">
-          <div className="space-y-4 mb-4">
-            {comments.length === 0 ? (
-              <p className="text-gray-500 text-center">No comments yet</p>
-            ) : (
+        <div className="mt-4">
+          <div className="space-y-4">
+            {comments.length > 0 ? (
               comments.map((comment) => (
-                <div key={comment.id} className="flex items-start space-x-3">
+                <div key={comment.id} className="flex items-start mb-4">
                   <Avatar
                     src={comment.profilePictureUrl || avatar}
                     alt={comment.userName}
                     size="sm"
-                    variant="circular"
+                    className="mr-3"
                   />
                   <div>
-                    <div className="bg-gray-100 rounded-lg p-3">
-                      <p className="font-medium text-gray-900">{comment.userName}</p>
-                      <p className="text-gray-700">{comment.text}</p>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {comment.timestamp?.toDate?.()?.toLocaleString() || "Just now"}
-                    </p>
+                    <h4 className="font-semibold text-white">{comment.userName}</h4>
+                    <p className="text-gray-400">{comment.text}</p>
                   </div>
                 </div>
               ))
+            ) : (
+              <p className="text-gray-500">No comments yet</p>
             )}
           </div>
-          <form onSubmit={handleComment} className="flex items-center space-x-2">
-            <Input
-              type="text"
-              placeholder="Add a comment..."
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              className="!border !border-gray-300"
-              labelProps={{ className: "hidden" }}
-              containerProps={{ className: "min-w-0" }}
-            />
-            <Button
-              type="submit"
-              variant="text"
-              size="sm"
-              className="rounded-full"
-            >
-              <PaperAirplaneIcon className="h-5 w-5" />
-            </Button>
-          </form>
+
+          <div className="mt-4">
+            <form onSubmit={handleComment}>
+              <div className="flex items-center">
+                <Input
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="bg-transparent border-b-2 text-white"
+                  placeholder="Add a comment..."
+                />
+                <Button type="submit" className="ml-2 text-blue-500">Post</Button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

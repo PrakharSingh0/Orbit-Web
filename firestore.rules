@@ -1,10 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow users to read and write their own data
+    // Allow users to read their own data
     match /users/{userId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
     
     // Allow users to read and write their own user tag
@@ -15,19 +15,19 @@ service cloud.firestore {
     
     // Allow users to read and write posts
     match /posts/{postId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read: if true; // Public read access
+      allow write: if request.auth != null && request.auth.uid == resource.data.uid; // User can only write their own posts
       
       // Allow users to read and write comments on posts
       match /comments/{commentId} {
-        allow read: if true;
-        allow write: if request.auth != null;
+        allow read: if true; // Public read access
+        allow write: if request.auth != null && request.auth.uid == request.resource.data.uid; // Only authenticated users can write comments
       }
       
       match /likes/{likeId} {
-        allow read: if true;
-        allow write: if request.auth != null;
+        allow read: if true; // Public read access
+        allow write: if request.auth != null && request.auth.uid == request.resource.data.uid; // Only authenticated users can write likes
       }
     }
   }
-} 
+}
