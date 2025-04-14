@@ -8,13 +8,15 @@ import Login from './Components/Pages/Login';
 import SignUp from './Components/Pages/SignUp';
 import Home from './Components/Pages/Home';
 import Profile from './Components/Pages/Profile';
+import Navbar from "./Components/Navbar/Navbar";
 
 function App() {
   return (
-    <div className="App">
-      <Router>
-        <AuthProvider>
-          <AppProvider>
+    <Router>
+      <AuthProvider>
+        <AppProvider>
+          <div className="min-h-screen bg-gray-50">
+            <Navbar />
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
@@ -38,10 +40,10 @@ function App() {
                 }
               />
             </Routes>
-          </AppProvider>
-        </AuthProvider>
-      </Router>
-    </div>
+          </div>
+        </AppProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

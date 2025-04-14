@@ -259,7 +259,7 @@ const PostCard = ({
       
       <div className="flex items-center mb-4">
         <Avatar
-          src={userData?.profilePictureUrl || profilePictureUrl || avatar}
+          src={profilePictureUrl || avatar}
           alt={userName}
           size="md"
           variant="circular"
