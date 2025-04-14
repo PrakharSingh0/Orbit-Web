@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import PostCard from "./PostCard";
+import UserCards from "./UserCards";
 import { PhotoIcon, LinkIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
 import Navbar from "../Navbar/Navbar";
@@ -158,8 +159,8 @@ const Main = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="max-w-2xl mx-auto px-4 pt-4 pb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+      <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="bg-white rounded-3xl shadow-lg p-4 mb-4">
           <form onSubmit={handleSubmitPost}>
             <div className="flex items-start space-x-4">
               <Avatar
@@ -271,7 +272,9 @@ const Main = () => {
           </form>
         </div>
 
-        <div className="space-y-6">
+        <UserCards />
+
+        <div className="space-y-4">
           {posts.map((post) => (
             <PostCard
               key={post.postId}
